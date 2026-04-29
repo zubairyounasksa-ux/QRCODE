@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>App QR Codes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --card: #13131a;
+      --border: #2a2a3a;
+      --accent1: #00e5ff;
+      --accent2: #ff3cac;
+      --text: #f0f0f5;
+      --muted: #6b6b80;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-head);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .container { position: relative; z-index: 1; width: 100%; max-width: 860px; }
+
+    header { text-align: center; margin-bottom: 3rem; animation: fadeDown 0.7s ease both; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent1);
+      margin-bottom: 0.75rem;
+    }
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--text) 40%, var(--accent1));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+    }
+    .subtitle { color: var(--muted); font-size: 0.95rem; font-family: var(--font-mono); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.75rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.25rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.7s ease both;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .card:nth-child(1) { animation-delay: 0.15s; }
+    .card:nth-child(2) { animation-delay: 0.3s;  }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 20px 20px 0 0;
+    }
+    .card.ios::before     { background: linear-gradient(90deg, var(--accent1), #00b4d8); }
+    .card.android::before { background: linear-gradient(90deg, var(--accent2), #ff6b35); }
+    .card:hover { border-color: #3a3a55; transform: translateY(-4px); }
+
+    .card-label { display: flex; align-items: center; gap: 0.6rem; font-size: 1.1rem; font-weight: 700; }
+    .card.ios     .card-label { color: var(--accent1); }
+    .card.android .card-label { color: var(--accent2); }
+    .card-icon { font-size: 1.4rem; }
+
+    .qr-wrapper {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-wrapper canvas, .qr-wrapper img { display: block; }
+
+    .permanent-badge {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: #4ade80;
+      background: rgba(74,222,128,0.08);
+      border: 1px solid rgba(74,222,128,0.2);
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    .url-preview {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      word-break: break-all;
+      text-align: center;
+      max-width: 240px;
+      line-height: 1.6;
+    }
+    .url-preview span {
+      color: var(--accent1);
+      opacity: 0.7;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 2;
+      animation: fadeUp 0.7s 0.45s ease both;
+    }
+    .footer strong { color: var(--text); }
+
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-18px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(22px);  } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <p class="eyebrow">Permanent QR &mdash; Dynamic Destination</p>
+    <h1>App Download QR Codes</h1>
+    <p class="subtitle">QR shape is fixed &mdash; destination updates from Google Sheet</p>
+  </header>
+
+  <div class="cards">
+
+    <div class="card ios">
+      <div class="card-label"><span class="card-icon">&#127822;</span> iOS App</div>
+      <div class="qr-wrapper" id="qr-ios"></div>
+      <div class="permanent-badge">&#128274; Permanent QR</div>
+      <div class="url-preview">
+        Points to:<br/>
+        <span>zubairyounasksa-ux.github.io/<br/>QRCODE/redirect-ios.html</span>
+      </div>
+    </div>
+
+    <div class="card android">
+      <div class="card-label"><span class="card-icon">&#129302;</span> Android App</div>
+      <div class="qr-wrapper" id="qr-android"></div>
+      <div class="permanent-badge">&#128274; Permanent QR</div>
+      <div class="url-preview">
+        Points to:<br/>
+        <span>zubairyounasksa-ux.github.io/<br/>QRCODE/redirect-android.html</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <strong>How it works:</strong> These QR codes never change &nbsp;&middot;&nbsp;
+    Update the URL in your Google Sheet &nbsp;&middot;&nbsp; Users always get the latest link
+  </div>
+</div>
+
+<script>
+  // These URLs are PERMANENT — they never change
+  // QR codes are generated once from these fixed GitHub Pages URLs
+  var IOS_REDIRECT_URL     = "https://zubairyounasksa-ux.github.io/QRCODE/redirect-ios.html";
+  var ANDROID_REDIRECT_URL = "https://zubairyounasksa-ux.github.io/QRCODE/redirect-android.html";
+
+  function makeQR(elementId, url, darkColor) {
+    var el = document.getElementById(elementId);
+    el.innerHTML = "";
+    new QRCode(el, {
+      text: url,
+      width: 168,
+      height: 168,
+      colorDark: darkColor || "#111",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+
+  // Generate QR codes immediately — no network call needed
+  makeQR("qr-ios",     IOS_REDIRECT_URL,     "#0a3d62");
+  makeQR("qr-android", ANDROID_REDIRECT_URL, "#4a0e2e");
+</script>
+</body>
+</html>

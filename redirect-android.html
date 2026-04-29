@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Redirecting to Android App...</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0a0f;
+      color: #f0f0f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 2rem;
+      text-align: center;
+    }
+    .icon { font-size: 3rem; animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.1);opacity:0.7;} }
+    .title { font-size: 1.2rem; font-weight: 600; color: #ff3cac; }
+    .msg   { font-size: 0.85rem; color: #6b6b80; }
+    .error { color: #f87171; font-size: 0.85rem; display: none; }
+    .retry-btn {
+      display: none;
+      margin-top: 0.5rem;
+      padding: 0.6rem 1.4rem;
+      background: #ff3cac;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="icon">&#129302;</div>
+  <div class="title">Taking you to the Android App&hellip;</div>
+  <div class="msg" id="msg">Fetching latest link from server&hellip;</div>
+  <div class="error" id="err"></div>
+  <button class="retry-btn" id="retryBtn" onclick="redirect()">Try Again</button>
+
+  <script>
+    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbym4Drjmlip5cMU8I-2L9_hUWrNrRjFvGdSZiNFla8kRaBFNKU6zJQqMUtjMPP2s5iP/exec";
+    var KEY = "android";
+
+    function redirect() {
+      document.getElementById("err").style.display = "none";
+      document.getElementById("retryBtn").style.display = "none";
+      document.getElementById("msg").textContent = "Fetching latest link from server\u2026";
+
+      fetch(APPS_SCRIPT_URL)
+        .then(function(res) {
+          if (!res.ok) throw new Error("Server error: " + res.status);
+          return res.json();
+        })
+        .then(function(data) {
+          var map = {};
+          Object.keys(data).forEach(function(k) {
+            map[k.toLowerCase().trim()] = data[k];
+          });
+
+          var url = map[KEY];
+          if (!url) throw new Error("No URL found for Android in the sheet.");
+
+          document.getElementById("msg").textContent = "Redirecting\u2026";
+          window.location.href = url;
+        })
+        .catch(function(err) {
+          document.getElementById("msg").textContent = "Could not fetch the link.";
+          document.getElementById("err").textContent = err.message;
+          document.getElementById("err").style.display = "block";
+          document.getElementById("retryBtn").style.display = "inline-block";
+        });
+    }
+
+    redirect();
+  </script>
+</body>
+</html>
